@@ -1,0 +1,30 @@
+[build-system]
+requires = [
+    "setuptools>=68",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dit"
+version = "13.1.0"
+description = "Deterministic Integrity Tower: a gated, signed, ledger-sealed mediation proxy for probabilistic generators"
+requires-python = ">=3.11"
+dependencies = []
+license = { text = "Apache-2.0" }
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+]
+
+[project.scripts]
+dit = "dit.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "legacy", "tests"]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
