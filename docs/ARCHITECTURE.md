@@ -118,6 +118,20 @@ accepts "revenue rose 3%" and also accepts "3 people disagreed", because
 both contain a number. A gate stack is a floor under output quality, not a
 substitute for review.
 
+## Two entry points
+
+`DeterministicIntegrityTower.run` and `evaluate` are the same gate
+evaluation with different surroundings. The tower adds what only makes
+sense when a generator is still reachable: retry with an instructional
+delta, oscillation memory across attempts, pacing, signing, sealing.
+`evaluate` is the bare judgement.
+
+Both call `run_stack` and `parity_of` in `dit.evaluate`. That sharing is
+deliberate and load-bearing: a consumer that audits stored text with
+`evaluate` must reach exactly the verdict the tower reached when it
+released that text, or the audit trail disagrees with itself.
+`test_tower_and_evaluate_agree` pins it.
+
 ## Extending
 
 Add a gate by satisfying the `Gate` protocol — a `name` and a

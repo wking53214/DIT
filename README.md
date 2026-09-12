@@ -99,6 +99,35 @@ Around the stack:
   digests, never payloads, so the trail proves what was released without
   restating it.
 
+## Judging text you already have
+
+The tower is for callers who can re-ask a generator. Some callers cannot:
+the API call is over, or the text came out of a record. `evaluate` answers
+the one question they have, synchronously, with no loop and no generator.
+
+```python
+from dit import evaluate
+
+verdict = evaluate(decision["reasoning"])
+if not verdict.passed:
+    log.warning("unevidenced prose entering the record: %s", verdict.failures)
+```
+
+It returns an `Evaluation` — `passed`, `parity`, per-gate results, and
+whether the failure was terminal. The tower gates through the same
+`run_stack`, so a caller auditing text with `evaluate` cannot reach a
+different verdict than the tower that released it.
+
+Pass your own stack when the default is wrong for the job:
+
+```python
+from dit import build_stack, default_rules
+from dit.gates import HedgingGate, SemanticContaminationGate
+
+stack = build_stack(default_rules(), (HedgingGate, SemanticContaminationGate))
+evaluate(text, stack)
+```
+
 ## Refusal is a value
 
 ```python

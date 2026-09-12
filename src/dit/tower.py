@@ -31,6 +31,7 @@ from dataclasses import replace
 from typing import Awaitable, Callable, Sequence
 
 from .config import HISTORICAL, LoopScope, TowerConfig
+from .evaluate import parity_of, run_stack
 from .gates import GSA_V13_STACK, Gate, build_stack
 from .governor import KineticGovernor
 from .injection import build_retry_prompt
@@ -104,21 +105,8 @@ class DeterministicIntegrityTower:
         return OscillationGuard(self.config)
 
     def _evaluate(self, text: str) -> tuple[GateResult, ...]:
-        """Run every gate. Terminal failures short-circuit the stack."""
-        results: list[GateResult] = []
-        for gate in self.gates:
-            result = gate.check(text)
-            results.append(result)
-            if not result.passed and result.severity is Severity.TERMINAL:
-                break
-        return tuple(results)
-
-    @staticmethod
-    def _parity(results: Sequence[GateResult]) -> float:
-        if not results:
-            return 1.0
-        passed = sum(1 for result in results if result.passed)
-        return round(passed / len(results), 4)
+        """Run every gate. Shared with dit.evaluate so the two cannot drift."""
+        return run_stack(text, self.gates)
 
     def _seal(self, result: TowerResult, prompt_digest: str) -> str | None:
         if self.ledger is None:
@@ -196,7 +184,7 @@ class DeterministicIntegrityTower:
             if terminal is not None:
                 outcome = TowerResult(
                     status=Status.TERMINAL_BREACH,
-                    parity=self._parity(results),
+                    parity=parity_of(results),
                     attempts=attempt,
                     latency_ms=round((time.monotonic() - started) * 1000.0, 2),
                     payload=None,
@@ -254,7 +242,7 @@ class DeterministicIntegrityTower:
 
         outcome = TowerResult(
             status=Status.EXHAUSTED,
-            parity=self._parity(last_results),
+            parity=parity_of(last_results),
             attempts=self.config.max_attempts,
             latency_ms=round((time.monotonic() - started) * 1000.0, 2),
             payload=None,
