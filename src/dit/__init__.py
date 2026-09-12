@@ -21,6 +21,7 @@ Quick start::
 """
 
 from .config import FAST, HISTORICAL, LoopScope, TowerConfig
+from .evaluate import Evaluation, evaluate, parity_of, run_stack
 from .gates import (
     FULL_STACK,
     GSA_V13_STACK,
@@ -60,6 +61,7 @@ __all__ = [
     "CitadelProcessor",
     "DITError",
     "DeterministicIntegrityTower",
+    "Evaluation",
     "FAST",
     "FULL_STACK",
     "GENESIS",
@@ -92,6 +94,9 @@ __all__ = [
     "build_stack",
     "canonical_json",
     "default_rules",
+    "evaluate",
     "neutralize_control_syntax",
+    "parity_of",
+    "run_stack",
     "state_digest",
 ]
