@@ -40,6 +40,10 @@ This repository is that assembly. Two things live here:
 - **`legacy/gsa_v13_citadel_processor.py`** — the recovered GSA v13.0
   engine, preserved as found, defects included. It runs. It is imported by
   the test suite as a control and by nothing else.
+- **`legacy/dpr_runtime.py`** — the Deterministic Policy Runtime, a second
+  recovered artifact from three weeks earlier, on the same terms. It reached
+  this repository after the archive it was filed under was lost;
+  `docs/PROVENANCE.md` records that route and the two defects it carries.
 - **`src/dit/`** — the tower at capacity: the same architecture with every
   finding from its own 2026-07-07 Tier 1 audit closed, and with the
   epistemic gate and hash-chain ledger from the later DIT-era Sentinel OS

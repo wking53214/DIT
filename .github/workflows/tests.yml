@@ -37,3 +37,8 @@ jobs:
         # It must still execute: tests/test_audit_findings.py reproduces
         # the historical defects against it.
         run: python legacy/gsa_v13_citadel_processor.py
+
+      - name: Run the quarantined DPR runtime
+        # Same contract: tests/test_dpr_runtime.py pins its behaviour, so it
+        # has to keep executing as found.
+        run: python legacy/dpr_runtime.py
