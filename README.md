@@ -1,5 +1,13 @@
 # DIT — Deterministic Integrity Tower
 
+**Role in the governed action stack:** OUTPUT INTEGRITY — deterministic mediation of probabilistic generator text (gate, normalize, pace, sign; optional hash-chain seal). Complements [Conservation_Kernel](https://github.com/wking53214/Conservation_Kernel) (transformation conservation) and [ANVIL](https://github.com/wking53214/ANVIL) (execution lineage). Hub: [observe-perceive](https://github.com/wking53214/observe-perceive).
+
+```text
+Live path: Admission → OBSERVE/Keys → Locks → PERCEIVE → Decision → Conservation → Execution → Custody
+```
+
+---
+
 A deterministic mediation proxy for probabilistic generators.
 
 Text that cannot satisfy the zero-trust gate stack does not leave the
