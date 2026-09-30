@@ -156,6 +156,36 @@ pytest
 traceability suite: one test per audit finding, each reproducing the defect
 against `legacy/` and demonstrating it closed in `dit`.
 
+## Connecting to CNS (optional)
+
+DIT stands alone: no runtime dependency, and the whole suite passes without
+CNS installed. If CNS is present, `dit.cns_connector` expresses DIT's
+verdicts as CNS gate results so they can be resolved alongside gates from
+other repositories.
+
+```
+pip install 'dit[cns]'
+```
+
+```python
+from dit.cns_connector import evaluate_to_cns
+from cns.gate import resolve
+
+verdicts = evaluate_to_cns(text, subject="reply-1")
+resolve(verdicts)        # PASS, RETRY or TERMINAL_BREACH, fail-closed
+```
+
+| DIT | CNS |
+|---|---|
+| where it judges | `OMEGA`: the payload as generated. DIT has no precondition end and the connector does not invent one, so `cns_chain(...).complete()` is `False` by design. |
+| passed | `PASS` |
+| failed, retryable | `RETRY` |
+| failed, terminal | `TERMINAL_BREACH` |
+| judged text | `subject` label plus a digest, so a verdict cannot be moved onto other text |
+
+Without CNS installed, the connector's functions raise `CnsNotInstalled` with
+the install command. Nothing else in DIT changes.
+
 ## Documentation
 
 - [`docs/PROVENANCE.md`](docs/PROVENANCE.md) — archive sources, what was
