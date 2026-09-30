@@ -152,7 +152,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-115 tests, no services, no network. `tests/test_audit_findings.py` is the
+141 tests, no services, no network. `tests/test_audit_findings.py` is the
 traceability suite: one test per audit finding, each reproducing the defect
 against `legacy/` and demonstrating it closed in `dit`.
 
