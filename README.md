@@ -64,4 +64,4 @@ CITADEL (archive regex)  →  DIT tower
                               └─ observe-perceive                   (not imported)
 ```
 
-Apache-2.0. Provenance: `docs/PROVENANCE.md`, `docs/AUDIT_REMEDIATION.md`.
+Proprietary. Copyright (c) 2026 William King. All rights reserved. See LICENSE. Provenance: `docs/PROVENANCE.md`, `docs/AUDIT_REMEDIATION.md`.

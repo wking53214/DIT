@@ -11,7 +11,7 @@ version = "13.1.0"
 description = "Deterministic Integrity Tower: a gated, signed, ledger-sealed mediation proxy for probabilistic generators"
 requires-python = ">=3.11"
 dependencies = []
-license = { text = "Apache-2.0" }
+license = { text = "Proprietary" }
 
 [project.optional-dependencies]
 dev = [
