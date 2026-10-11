@@ -114,6 +114,17 @@ class StasisSigner:
         """Constant-time comparison, so a caller cannot time-probe the key."""
         return hmac.compare_digest(self.sign(payload), signature)
 
+    def verify_legacy_sha384(self, payload: str, value: str) -> bool:
+        """LEGACY, VERIFY-ONLY. Checks a pre-HMAC-SHA256 signature.
+
+        Releases made before key IDs were recorded were signed with HMAC-SHA384
+        under the same key. This method re-checks those so existing payloads can
+        still be verified. It never signs anything, and nothing new is written
+        with it. Constant-time comparison, like :meth:`verify`.
+        """
+        expected = hmac.new(self._key, payload.encode("utf-8"), hashlib.sha384).hexdigest()
+        return isinstance(value, str) and hmac.compare_digest(expected, value)
+
     def check_block(self, payload: str, block: object) -> Optional[str]:
         """None when ``block`` is a valid signature over ``payload`` by this key.
 
