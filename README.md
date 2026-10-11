@@ -7,7 +7,7 @@ Deterministic **mediation proxy** for probabilistic generator text. Version `13.
 **OUTPUT INTEGRITY** (post-generation, pre-downstream-trust). Complements Conservation Kernel (transformation conservation) and ANVIL (execution lineage). Consumed by [`sentinel_os`](https://github.com/wking53214/sentinel_os) `epistemic/dit_gate.py` (pinned to `26cee7b9`, evaluate() API). **Not** a stage in the observe-perceive orchestrator chain.
 
 ```text
-generator → oscillation guard → gate stack → normalizer → kinetic governor → HMAC-SHA384 signer → optional HashChainLedger → TowerResult
+generator → oscillation guard → gate stack → normalizer → kinetic governor → HMAC-SHA256 signer (key ID recorded) → optional HashChainLedger → TowerResult
 ```
 
 ## 2. Full System Scope & Architectural Depth
@@ -22,7 +22,7 @@ Assembly of recovered GSA v13 Citadel processor + Deterministic Policy Runtime, 
 
 Gates (`FULL_STACK` / `GSA_V13_STACK`): Identity, Hedging, Causality, Semantic contamination — independent predicates over **raw generated text**. Retry with instructional delta up to a budget. `run()` returns refusal values; `run_strict()` raises (`TowerCollapse`) for the historical GSA v13 contract.
 
-`StasisSigner.from_env()` HMAC-SHA384. Missing key → `MissingSigningKey`. `HashChainLedger.verify()` recomputes; tamper → `LedgerTampered`. `KineticGovernor` paces release. `OscillationGuard` SHA-256 digests bounded loops.
+`StasisSigner.from_env()` HMAC-SHA256, key from `DIT_STASIS_KEY`, key ID from `DIT_STASIS_KEY_ID`. Missing key → `MissingSigningKey`. `HashChainLedger.verify()` recomputes; tamper → `LedgerTampered`. `KineticGovernor` paces release. `OscillationGuard` SHA-256 digests bounded loops.
 
 Lineage: CITADEL regex enforcer → this tower. CITADEL remains an archive.
 

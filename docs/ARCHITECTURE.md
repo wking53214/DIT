@@ -20,7 +20,7 @@ prompt
   │
   ├─► StructureNormalizer                   release-time rewrite
   ├─► KineticGovernor                       paced release, 0.815
-  ├─► StasisSigner                          HMAC-SHA384
+  ├─► StasisSigner                          HMAC-SHA256, key ID recorded
   └─► HashChainLedger                       optional seal
          │
          └─► TowerResult

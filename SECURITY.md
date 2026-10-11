@@ -10,7 +10,7 @@ issue for a vulnerability.
 The integrity of text released by a probabilistic generator, and the
 evidence that it was released under a known gate configuration.
 
-- **Stasis signatures** (HMAC-SHA384) prove a payload is the one that
+- **Stasis signatures** (HMAC-SHA256, key ID recorded) prove a payload is the one that
   passed the gates.
 - **The hash chain** (SHA-256, canonical JSON) makes edits to the
   transaction record detectable.
