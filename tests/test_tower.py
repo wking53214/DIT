@@ -31,9 +31,13 @@ def test_compliant_payload_passes_on_the_first_attempt():
 
 
 def test_released_payload_carries_a_verifiable_signature():
-    signer = StasisSigner(b"0123456789abcdef0123456789abcdef")
+    signer = StasisSigner(b"0123456789abcdef0123456789abcdef", "test-key")
     result = run(tower(constant(COMPLIANT), signer=signer).run("status"))
     assert signer.verify(result.payload, result.checksum)
+    block = result.metadata["signature"]
+    assert block["algorithm"] == "hmac-sha256"
+    assert block["key_id"] == "test-key"
+    assert signer.check_block(result.payload, block) is None
 
 
 def test_drift_is_recovered_after_the_delta_lands():

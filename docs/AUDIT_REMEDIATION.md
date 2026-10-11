@@ -42,7 +42,7 @@ Loop state was tracked with MD5. A crafted payload could collide with a
 prior digest and force a false loop classification, dropping a legitimate
 transaction.
 
-`state_digest` is SHA-256. HMAC-SHA384 for stasis signatures is unchanged;
+`state_digest` is SHA-256. Stasis signatures moved from HMAC-SHA384 to HMAC-SHA256 with a recorded key ID;
 it was already sound.
 
 → `test_must_fix_upgrade_state_hashing_primitives`

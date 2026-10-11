@@ -14,7 +14,7 @@ Pipeline, in order::
       -> gate stack                    raw text, terminal gates first
       -> structure normalizer          post-pass, gate-safe by construction
       -> kinetic governor              paced release
-      -> stasis signer                 HMAC-SHA384
+      -> stasis signer                 HMAC-SHA256, key ID recorded
       -> hash-chain ledger             optional, tamper-evident
       -> TowerResult
 
@@ -204,7 +204,8 @@ class DeterministicIntegrityTower:
             if not failures:
                 payload = self.normalizer.normalize(raw_output)
                 waited = await self.governor.pace(payload)
-                checksum = self.signer.sign(payload)
+                signature = self.signer.signature_block(payload)
+                checksum = signature["value"]
                 outcome = TowerResult(
                     status=Status.PASS,
                     parity=1.0000,
@@ -217,6 +218,7 @@ class DeterministicIntegrityTower:
                         "paced_seconds": round(waited, 4),
                         "normalized": payload != raw_output,
                         "ephemeral_signature": self.signer.ephemeral,
+                        "signature": signature,
                     },
                 )
                 ledger_hash = self._seal(outcome, prompt_digest)

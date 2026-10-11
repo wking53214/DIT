@@ -56,7 +56,7 @@ def test_must_fix_externalize_cryptographic_secrets():
     assert "ADAMANTIUM" not in inspect.getsource(dit.tower)
 
     with pytest.raises(ValueError, match="hardcoded key"):
-        dit.StasisSigner(legacy._secret_key)
+        dit.StasisSigner(legacy._secret_key, "test-key")
 
     # A tower with no configured key signs with a process-local secret and
     # says so, rather than silently using a published one.
