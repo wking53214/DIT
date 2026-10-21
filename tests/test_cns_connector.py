@@ -6,11 +6,16 @@ environments, is in ``test_cns_independence.py`` and never skips.
 
 from __future__ import annotations
 
+import os
+
 import pytest
 
-cns_gate = pytest.importorskip(
-    "cns.gate", reason="cns not installed; run in an environment with dit[cns]"
-)
+if os.environ.get("DIT_REQUIRE_CNS") == "1":  # CI: a missing cns is a failure, not a skip
+    import cns.gate as cns_gate
+else:
+    cns_gate = pytest.importorskip(
+        "cns.gate", reason="cns not installed; run in an environment with dit[cns]"
+    )
 
 from dit import (  # noqa: E402
     FULL_STACK,
