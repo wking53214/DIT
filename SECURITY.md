@@ -13,7 +13,9 @@ evidence that it was released under a known gate configuration.
 - **Stasis signatures** (HMAC-SHA256, key ID recorded) prove a payload is the one that
   passed the gates.
 - **The hash chain** (SHA-256, canonical JSON) makes edits to the
-  transaction record detectable.
+  transaction record detectable. Detecting tail truncation or wholesale
+  replacement requires comparing against a recorded head
+  (`verify(expected_head=...)`); a bare walk cannot see either.
 - **Delta hardening** stops caller text impersonating the tower's own
   control frame on retry.
 

@@ -20,7 +20,7 @@ Assembly of recovered GSA v13 Citadel processor + Deterministic Policy Runtime, 
 | `legacy/gsa_v13_citadel_processor.py` | Recovered engine, defects included; test control only |
 | `legacy/dpr_runtime.py` | Recovered; two documented defects; not imported by tower |
 
-Gates (`FULL_STACK` / `GSA_V13_STACK`): Identity, Hedging, Causality, Semantic contamination — independent predicates over **raw generated text**. Retry with instructional delta up to a budget. `run()` returns refusal values; `run_strict()` raises (`TowerCollapse`) for the historical GSA v13 contract.
+Gates (`FULL_STACK` / `GSA_V13_STACK`): Identity, Hedging, Causality, Semantic contamination — independent predicates over **raw generated text**. The default stack is GSA_V13_STACK (identity, hedging, causality); pass gates=build_stack(rules, FULL_STACK) to add the terminal semantic contamination gate. Retry with instructional delta up to a budget. `run()` returns refusal values; `run_strict()` raises (`TowerCollapse`) for the historical GSA v13 contract.
 
 `StasisSigner.from_env()` HMAC-SHA256, key from `DIT_STASIS_KEY`, key ID from `DIT_STASIS_KEY_ID`. Missing key → `MissingSigningKey`. `HashChainLedger.verify()` recomputes; tamper → `LedgerTampered`. `KineticGovernor` paces release. `OscillationGuard` SHA-256 digests bounded loops.
 

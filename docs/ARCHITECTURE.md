@@ -26,6 +26,10 @@ prompt
          └─► TowerResult
 ```
 
+The default stack is GSA_V13_STACK (identity, hedging, causality); pass
+gates=build_stack(rules, FULL_STACK) to add the terminal semantic
+contamination gate.
+
 On a retryable failure the reasons accumulate, an instructional delta is
 assembled from the whole accumulated set, and the loop runs again up to
 `config.max_attempts`. On a terminal failure the transaction ends
