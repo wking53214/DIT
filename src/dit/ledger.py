@@ -69,8 +69,12 @@ class HashChainLedger:
         """A read-only snapshot. Mutating the copies cannot edit the chain."""
         return tuple(dict(entry) for entry in self._log)
 
-    def verify(self) -> bool:
-        """True when every link and every digest still holds."""
+    def verify(self, expected_head: str | None = None) -> bool:
+        """True when every link and every digest still holds.
+
+        A bare walk cannot see a truncated tail or a wholesale replacement;
+        pass ``expected_head``, a head recorded earlier, to detect those.
+        """
         previous = GENESIS
         for entry in self._log:
             if entry.get("prev_hash") != previous:
@@ -78,11 +82,13 @@ class HashChainLedger:
             if entry.get("hash") != _digest(entry):
                 return False
             previous = entry["hash"]
+        if expected_head is not None and previous != expected_head:
+            return False
         return True
 
-    def require_intact(self) -> None:
+    def require_intact(self, expected_head: str | None = None) -> None:
         """Raise :class:`LedgerTampered` if verification fails."""
-        if not self.verify():
+        if not self.verify(expected_head=expected_head):
             raise LedgerTampered(
                 f"hash-chain verification failed over {len(self._log)} record(s)"
             )
