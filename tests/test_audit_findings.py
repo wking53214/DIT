@@ -149,9 +149,12 @@ def test_should_fix_normalization_phase_order():
     engine = tower(
         constant(text), rules=dit.RuleSet.from_mapping(hazardous, name="hazardous")
     )
+    # The rewrite destroys the causal link, so the release is re-gated and
+    # refused rather than signed.
     result = run(engine.run("status"))
-    assert result.status is Status.PASS
-    assert result.payload == "Throughput shifted use cache pressure."
+    assert result.status is not Status.PASS
+    assert result.payload is None
+    assert any("Normalization produced a non-compliant payload" in f for f in result.failures)
 
 
 # -- SECURITY -----------------------------------------------------------

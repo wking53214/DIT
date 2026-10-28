@@ -70,3 +70,18 @@ def test_reserved_fields_cannot_be_supplied():
 
 def test_canonical_json_is_key_order_independent():
     assert canonical_json({"b": 1, "a": 2}) == canonical_json({"a": 2, "b": 1})
+
+
+def test_tail_truncation_is_detected_against_a_recorded_head():
+    """A bare walk cannot see a dropped tail: the remaining chain is intact.
+    Comparing against a head recorded when the chain was complete can."""
+    ledger = HashChainLedger()
+    for index in range(3):
+        ledger.append({"cycle": index})
+    head = ledger.head
+    ledger._log.pop()
+    assert ledger.verify()
+    assert not ledger.verify(expected_head=head)
+    assert ledger.verify(expected_head=ledger.head)
+    with pytest.raises(LedgerTampered):
+        ledger.require_intact(expected_head=head)
