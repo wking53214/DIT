@@ -82,8 +82,9 @@ ordering is harmless — none of the eight prohibited verbs is a pronoun, a
 hedge, a causal connective, or a digit, so the rewrite cannot change a gate
 outcome. But that is a property of one rule set, not of the design, and the
 whole point of making rules injectable is that deployments will write their
-own. `dit` gates the payload as generated and normalizes on release, which
-makes the hazard unreachable regardless of rule set.
+own. `dit` gates the payload as generated, normalizes on release, and
+re-gates the normalized payload, refusing the transaction if the rewrite is
+non-compliant.
 
 `tests/test_audit_findings.py::test_should_fix_normalization_phase_order`
 pins both halves: the audit's illustration failing to reproduce, and the

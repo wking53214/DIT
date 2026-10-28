@@ -129,7 +129,11 @@ class DeterministicIntegrityTower:
     # -- public API ---------------------------------------------------
 
     async def run(self, prompt: str) -> TowerResult:
-        """Drive one transaction to a verdict. Never raises on refusal."""
+        """Drive one transaction to a verdict. Never raises on refusal.
+
+        The normalized payload is re-gated before release; a rewrite the
+        gates reject is refused like any other failing attempt.
+        """
         guard = self._guard()
         started = time.monotonic()
         prompt_digest = state_digest(prompt)
@@ -203,6 +207,19 @@ class DeterministicIntegrityTower:
 
             if not failures:
                 payload = self.normalizer.normalize(raw_output)
+                if payload != raw_output:
+                    # The released text must clear the same stack the raw
+                    # text cleared; a rule set whose normalizer touches gate
+                    # vocabulary would otherwise release text the gates reject.
+                    failures = tuple(
+                        f"Normalization produced a non-compliant payload: {result.reason}"
+                        for result in self._evaluate(payload)
+                        if not result.passed
+                    )
+                    if failures:
+                        history[-1] = replace(history[-1], failures=failures)
+
+            if not failures:
                 waited = await self.governor.pace(payload)
                 signature = self.signer.signature_block(payload)
                 checksum = signature["value"]

@@ -4,14 +4,17 @@ from conftest import COMPLIANT, constant, run, scripted
 from dit import (
     FAST,
     FULL_STACK,
+    GSA_V13_PATTERNS,
     DeterministicIntegrityTower,
     HashChainLedger,
     LoopScope,
+    RuleSet,
     StasisSigner,
     Status,
     TowerCollapse,
     build_stack,
     default_rules,
+    evaluate,
     state_digest,
 )
 
@@ -131,6 +134,19 @@ def test_normalization_runs_after_the_gates():
     assert result.status is Status.PASS
     assert result.payload == "Teams use throughput because load rose 12%."
     assert result.metadata["normalized"] is True
+
+
+def test_released_payload_passes_the_gates_it_was_judged_by():
+    """A rule set whose normalizer touches gate vocabulary must not release
+    text the gate stack rejects. The normalized payload is re-gated."""
+    hazardous = dict(GSA_V13_PATTERNS)
+    hazardous["prohibited_abstract_verbs"] = r"\b(optimize|driven by)\b"
+    engine = tower(
+        constant("Throughput shifted driven by cache pressure."),
+        rules=RuleSet.from_mapping(hazardous, name="hazardous"),
+    )
+    result = run(engine.run("status"))
+    assert result.status is not Status.PASS or evaluate(result.payload, engine.gates).passed
 
 
 def test_terminal_breach_refuses_without_spending_retries():
