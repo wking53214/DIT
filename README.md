@@ -85,6 +85,16 @@ verdicts = evaluate_to_cns(text, subject="reply-1")
 resolve(verdicts)        # PASS, RETRY or TERMINAL_BREACH, fail-closed
 ```
 
+For an actual successful TowerResult, use tower_result_to_cns(tower,
+result, subject=...) instead of binding a separate input string. That helper
+re-runs the tower's configured gates on the exact released payload and binds
+the CNS verdicts to that payload, DIT's native payload digest, signature block,
+checksum and optional ledger hash. The helper checks the native signature
+with the tower's signer and verifies an attached ledger at the recorded head.
+The CNS digest does not establish signer identity or replace that native
+evidence; callers needing truncation detection must retain a trusted ledger
+head outside the ledger.
+
 | DIT | CNS |
 |---|---|
 | where it judges | `OMEGA`: the payload as generated. DIT has no precondition end and the connector does not invent one, so `cns_chain(...).complete()` is `False` by design. |

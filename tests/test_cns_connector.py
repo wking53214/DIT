@@ -7,6 +7,7 @@ environments, is in ``test_cns_independence.py`` and never skips.
 from __future__ import annotations
 
 import os
+from dataclasses import replace
 
 import pytest
 
@@ -18,6 +19,9 @@ else:
     )
 
 from dit import (  # noqa: E402
+    FAST,
+    DeterministicIntegrityTower,
+    HashChainLedger,
     FULL_STACK,
     CausalityGate,
     HedgingGate,
@@ -27,11 +31,15 @@ from dit import (  # noqa: E402
     default_rules,
     evaluate,
 )
+from conftest import constant, run  # noqa: E402
+from dit.oscillation import state_digest  # noqa: E402
+
 from dit.cns_connector import (  # noqa: E402
     CnsGate,
     cns_available,
     cns_chain,
     evaluate_to_cns,
+    tower_result_to_cns,
     payload_digest,
     to_cns_result,
 )
@@ -116,6 +124,52 @@ def test_a_cns_gate_judges_the_same_way_as_the_gate_it_wraps():
 def test_a_cns_gate_refuses_a_non_text_candidate():
     with pytest.raises(TypeError):
         CnsGate(HedgingGate(default_rules())).check(b"bytes")
+
+
+def test_tower_result_binding_covers_the_normalized_release_and_native_evidence():
+    raw = "Teams optimize throughput because load rose 12%."
+    ledger = HashChainLedger()
+    tower = DeterministicIntegrityTower(constant(raw), config=FAST, ledger=ledger)
+    result = run(tower.run("status"))
+
+    assert result.status.value == "PASS"
+    assert result.payload == "Teams use throughput because load rose 12%."
+    verdicts = tower_result_to_cns(tower, result, subject="release-1")
+    expected = cns_gate.subject_digest({
+        "status": result.status.value,
+        "payload": result.payload,
+        "native_payload_digest": state_digest(result.payload),
+        "checksum": result.checksum,
+        "signature": result.metadata["signature"],
+        "ledger_hash": result.ledger_hash,
+    })
+    assert len(verdicts) > 0
+    assert all(v.subject == "release-1" for v in verdicts)
+    assert all(v.subject_digest == expected for v in verdicts)
+    assert all(v.binds("release-1", expected) for v in verdicts)
+    assert not any(
+        v.binds("release-1", cns_gate.subject_digest({"text": raw}))
+        for v in verdicts
+    )
+    assert result.ledger_hash == ledger.head
+    assert ledger.verify(expected_head=result.ledger_hash)
+    assert result.metadata["signature"]["value"] == result.checksum
+    assert tower.signer.verify(result.payload, result.checksum)
+
+    altered = replace(result, payload=result.payload + " altered")
+    with pytest.raises(ValueError, match="valid signature"):
+        tower_result_to_cns(tower, altered, subject="release-1")
+    altered_ledger = replace(result, ledger_hash="0" * 64)
+    with pytest.raises(ValueError, match="ledger does not verify"):
+        tower_result_to_cns(tower, altered_ledger, subject="release-1")
+
+
+def test_tower_result_binding_refuses_a_non_release():
+    tower = DeterministicIntegrityTower(constant("I think this may work."), config=FAST)
+    result = run(tower.run("status"))
+    assert result.payload is None
+    with pytest.raises(ValueError, match="only a PASS"):
+        tower_result_to_cns(tower, result, subject="release-2")
 
 
 def test_the_chain_is_outcome_only_and_says_so():
