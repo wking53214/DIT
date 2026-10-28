@@ -136,6 +136,15 @@ def test_normalization_runs_after_the_gates():
     assert result.metadata["normalized"] is True
 
 
+def test_result_exposes_the_digest_of_the_gated_raw_text():
+    payload = "Teams optimize throughput because load rose 12%."
+    ledger = HashChainLedger()
+    result = run(tower(constant(payload), ledger=ledger).run("status"))
+    assert result.metadata["raw_digest"] == state_digest(payload)
+    assert ledger.entries()[0]["raw_digest"] == state_digest(payload)
+    assert ledger.entries()[0]["payload_digest"] == state_digest(result.payload)
+
+
 def test_released_payload_passes_the_gates_it_was_judged_by():
     """A rule set whose normalizer touches gate vocabulary must not release
     text the gate stack rejects. The normalized payload is re-gated."""

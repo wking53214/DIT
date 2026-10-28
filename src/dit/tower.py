@@ -121,6 +121,7 @@ class DeterministicIntegrityTower:
                 "payload_digest": (
                     state_digest(result.payload) if result.payload is not None else None
                 ),
+                "raw_digest": result.metadata.get("raw_digest"),
                 "checksum": result.checksum,
                 "failures": list(result.failures),
             }
@@ -234,6 +235,7 @@ class DeterministicIntegrityTower:
                     metadata={
                         "paced_seconds": round(waited, 4),
                         "normalized": payload != raw_output,
+                        "raw_digest": digest,
                         "ephemeral_signature": self.signer.ephemeral,
                         "signature": signature,
                     },
