@@ -46,12 +46,15 @@ Install with the extra: ``pip install 'dit[cns]'``.
 from __future__ import annotations
 
 import importlib
+from dataclasses import replace
 from types import ModuleType
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from .evaluate import run_stack
+from .oscillation import state_digest
 from .gates import GSA_V13_STACK, Gate, build_stack
-from .results import GateResult, Severity
+from .results import GateResult, Severity, Status, TowerResult
+from .tower import DeterministicIntegrityTower
 from .rules import RuleSet, default_rules
 
 __all__ = [
@@ -60,6 +63,7 @@ __all__ = [
     "cns_available",
     "cns_chain",
     "evaluate_to_cns",
+    "tower_result_to_cns",
     "payload_digest",
     "to_cns_result",
 ]
@@ -158,6 +162,71 @@ class CnsGate:
 
 def _default_stack(rules: RuleSet | None) -> tuple[Gate, ...]:
     return build_stack(rules or default_rules(), GSA_V13_STACK)
+
+
+def tower_result_to_cns(
+    tower: DeterministicIntegrityTower,
+    result: TowerResult,
+    *,
+    subject: str,
+) -> tuple[Any, ...]:
+    """Bind CNS verdicts to the exact payload and release evidence in a TowerResult.
+
+    This only accepts a successful native release whose signature verifies
+    under this tower's signer and whose attached ledger (if any) verifies at
+    the result's head. It re-runs the tower's own gates against the released
+    payload, then binds each CNS verdict to the final payload, DIT payload
+    digest, signature block, checksum and optional ledger hash. The CNS digest
+    does not replace either native evidence item or establish signer identity.
+    """
+    if not isinstance(tower, DeterministicIntegrityTower):
+        raise TypeError("tower must be a DeterministicIntegrityTower")
+    if not isinstance(result, TowerResult):
+        raise TypeError("result must be a TowerResult")
+    if result.status is not Status.PASS or not isinstance(result.payload, str):
+        raise ValueError("only a PASS TowerResult with a released payload can be bound")
+    signature = result.metadata.get("signature")
+    if (
+        not isinstance(result.checksum, str)
+        or not result.checksum
+        or not isinstance(signature, Mapping)
+        or signature.get("value") != result.checksum
+        or signature.get("algorithm") != tower.signer.algorithm
+        or signature.get("key_id") != tower.signer.key_id
+        or not tower.signer.verify(result.payload, result.checksum)
+    ):
+        raise ValueError("TowerResult lacks a valid signature from this tower")
+    if tower.ledger is None:
+        if result.ledger_hash is not None:
+            raise ValueError("TowerResult ledger hash cannot be verified by this tower")
+    elif (
+        result.ledger_hash != tower.ledger.head
+        or not tower.ledger.verify(expected_head=result.ledger_hash)
+    ):
+        raise ValueError("TowerResult ledger does not verify at its recorded head")
+    if not tower.gates:
+        raise ValueError("a release cannot be bound without DIT gate results")
+
+    native_results = run_stack(result.payload, tower.gates)
+    if not native_results:
+        raise ValueError("a release cannot be bound without DIT gate results")
+    cns = _cns_gate()
+    release_content = {
+        "status": result.status.value,
+        "payload": result.payload,
+        "native_payload_digest": state_digest(result.payload),
+        "checksum": result.checksum,
+        "signature": dict(signature),
+        "ledger_hash": result.ledger_hash,
+    }
+    digest = cns.subject_digest(release_content)
+    return tuple(
+        replace(
+            to_cns_result(native, result.payload, subject=subject),
+            subject_digest=digest,
+        )
+        for native in native_results
+    )
 
 
 def cns_chain(
