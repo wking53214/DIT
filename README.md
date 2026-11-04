@@ -101,6 +101,7 @@ head outside the ledger.
 | passed | `PASS` |
 | failed, retryable | `RETRY` |
 | failed, terminal | `TERMINAL_BREACH` |
+| anything else: not a DIT `GateResult`, `passed` not a `bool` (`"no"`), `severity` not a `Severity` member (`"terminal"` as a plain string) | `TERMINAL_BREACH`, never a pass and never downgraded to `RETRY` |
 | judged text | `subject` label plus a digest, so a verdict cannot be moved onto other text |
 
 Without CNS installed, the connector's functions raise `CnsNotInstalled` with
