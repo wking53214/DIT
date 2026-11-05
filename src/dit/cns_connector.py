@@ -29,6 +29,10 @@ gate position          ``OMEGA``. DIT judges the payload *as
 failed, RETRYABLE      ``RETRY``  (a re-render with a delta may fix it)
 failed, TERMINAL       ``TERMINAL_BREACH``  (no delta repairs it)
 ``reason``             ``reason`` unchanged
+anything else          ``TERMINAL_BREACH``  (not a DIT GateResult, a
+                       ``passed`` that is not a bool, a ``severity``
+                       that is not a ``Severity`` member: never a
+                       pass and never downgraded to RETRY)
 judged text            ``subject`` (a label, default ``"payload"``)
                        and ``subject_digest``, which is
                        ``cns.gate.subject_digest({"text": text})``
@@ -111,19 +115,46 @@ def payload_digest(text: str) -> str:
 def to_cns_result(
     result: GateResult, text: str, *, subject: str = DEFAULT_SUBJECT
 ) -> Any:
-    """Translate one DIT verdict on ``text`` into a ``cns.gate.GateResult``."""
+    """Translate one DIT verdict on ``text`` into a ``cns.gate.GateResult``.
+
+    Types are read strictly. Only a :class:`~dit.results.GateResult` whose
+    ``passed`` is a ``bool`` and whose ``severity`` is a :class:`Severity`
+    member is translated by the table; anything else (``passed="no"``,
+    ``severity="terminal"`` as a plain string, a dict, ``None``) is a
+    ``TERMINAL_BREACH``, never a pass or a downgrade.
+    """
+    return _translate(result, text, subject=subject, fallback_name="dit.unrecognised")
+
+
+def _translate(result: object, text: str, *, subject: str, fallback_name: str) -> Any:
     gate = _cns_gate()
-    if result.passed:
+    name = getattr(result, "gate", None)
+    if not isinstance(name, str) or not name:
+        name = fallback_name
+    reason = getattr(result, "reason", None)
+    if (
+        not isinstance(result, GateResult)
+        or not isinstance(result.passed, bool)
+        or not isinstance(result.severity, Severity)
+        or not isinstance(reason, str)
+    ):
+        outcome = gate.GateOutcome.TERMINAL_BREACH
+        reason = (
+            "the verdict is not a DIT GateResult with a bool passed, a Severity "
+            f"severity and a text reason (got {type(result).__name__}); an "
+            "unrecognised verdict is never read as a pass or a retry"
+        )
+    elif result.passed:
         outcome = gate.GateOutcome.PASS
     elif result.severity is Severity.TERMINAL:
         outcome = gate.GateOutcome.TERMINAL_BREACH
     else:
         outcome = gate.GateOutcome.RETRY
     return gate.GateResult(
-        gate=result.gate,
+        gate=name,
         position=gate.GatePosition.OMEGA,
         outcome=outcome,
-        reason=result.reason,
+        reason=reason,
         subject=subject,
         subject_digest=gate.subject_digest({"text": text}),
     )
@@ -155,8 +186,9 @@ class CnsGate:
             raise TypeError(
                 f"DIT gates judge text; got {type(candidate).__name__}"
             )
-        return to_cns_result(
-            self._inner.check(candidate), candidate, subject=self._subject
+        return _translate(
+            self._inner.check(candidate), candidate,
+            subject=self._subject, fallback_name=self.name,
         )
 
 
