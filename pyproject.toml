@@ -18,9 +18,9 @@ dev = [
     "pytest==9.1.1",
 ]
 # Optional: lets DIT's verdicts be expressed as CNS gate results. DIT imports
-# nothing from CNS unless dit.cns_connector is used. Pinned to tag v2.3.0.
+# nothing from CNS unless dit.cns_connector is used. Pinned to tag v3.0.0.
 cns = [
-    "cns @ git+https://github.com/wking53214/CNS.git@v2.3.0",
+    "cns @ git+https://github.com/wking53214/CNS.git@v3.0.0",
 ]
 
 [project.scripts]
