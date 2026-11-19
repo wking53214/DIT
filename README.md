@@ -74,7 +74,7 @@ verdicts as CNS gate results so they can be resolved alongside gates from
 other repositories.
 
 ```
-pip install 'dit[cns]'
+pip install 'dit[cns] @ git+https://github.com/wking53214/dit.git@main'
 ```
 
 ```python
