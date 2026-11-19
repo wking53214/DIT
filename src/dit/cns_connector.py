@@ -44,7 +44,7 @@ stratum with no precondition") stated honestly, not a defect in the
 connector. A consumer that wants a complete chain supplies the ``alpha`` end
 from a repository that has one.
 
-Install with the extra: ``pip install 'dit[cns]'``.
+Install with the extra: ``pip install 'dit[cns] @ git+https://github.com/wking53214/dit.git@main'``.
 """
 
 from __future__ import annotations
@@ -72,7 +72,10 @@ __all__ = [
     "to_cns_result",
 ]
 
-INSTALL_HINT = "pip install 'dit[cns]'"
+INSTALL_HINT = (
+    "pip install 'dit[cns] @ "
+    "git+https://github.com/wking53214/dit.git@main'"
+)
 
 #: What ``subject`` is set to when the caller does not name the judged content.
 DEFAULT_SUBJECT = "payload"

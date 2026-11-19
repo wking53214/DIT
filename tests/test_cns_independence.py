@@ -53,7 +53,7 @@ def test_connector_says_what_is_missing_when_cns_is_blocked():
         try:
             evaluate_to_cns("x")
         except CnsNotInstalled as exc:
-            assert "pip install 'dit[cns]'" in str(exc)
+            assert "pip install 'dit[cns] @ git+https://github.com/wking53214/dit.git@main'" in str(exc)
             assert isinstance(exc, ImportError)
             print('ok')
         """
