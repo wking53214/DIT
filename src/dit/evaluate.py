@@ -22,6 +22,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Sequence
 
+from .fold import fold_for_matching
 from .gates import GSA_V13_STACK, Gate, build_stack
 from .results import GateResult, Severity
 from .rules import RuleSet, default_rules
@@ -61,6 +62,10 @@ def run_stack(text: str, gates: Sequence[Gate]) -> tuple[GateResult, ...]:
     already outside the evidentiary frame produces findings about text
     that will not be released either way.
     """
+    # The gates match fixed words letter for letter, so they read a folded copy: a
+    # zero-width character or a lookalike letter inside a word must not hide it.
+    # The text itself is not changed.
+    text = fold_for_matching(text)
     results: list[GateResult] = []
     for gate in gates:
         result = gate.check(text)
