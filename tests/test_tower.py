@@ -227,3 +227,15 @@ def test_generator_receives_the_original_prompt_first():
     generator = constant(COMPLIANT)
     run(tower(generator).run("the original prompt"))
     assert generator.prompts[0] == "the original prompt"
+
+
+def test_an_empty_gate_list_is_refused_rather_than_releasing_any_text():
+    with pytest.raises(ValueError, match="empty gate list"):
+        DeterministicIntegrityTower(scripted("anything at all"), gates=[])
+    with pytest.raises(ValueError, match="empty gate list"):
+        DeterministicIntegrityTower(scripted("anything at all"), gates=())
+
+
+def test_leaving_gates_unset_still_builds_the_default_stack():
+    tower = DeterministicIntegrityTower(scripted("hello"))
+    assert len(tower.gates) > 0

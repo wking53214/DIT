@@ -62,7 +62,8 @@ class DeterministicIntegrityTower:
         generator: an awaitable taking a prompt and returning raw text.
         config: the operating envelope. Defaults to the historical profile.
         rules: the linguistic rule set. Defaults to the GSA v13.0 patterns.
-        gates: an explicit gate stack. Defaults to the three retryable
+        gates: an explicit gate stack. It may not be empty (a ValueError
+            is raised, since no gates would release any text). Defaults to the three retryable
             strata; pass :data:`dit.gates.FULL_STACK` to add the epistemic
             terminal gate.
         signer: stasis signer. Defaults to a process-local ephemeral key,
@@ -82,6 +83,10 @@ class DeterministicIntegrityTower:
         ledger: HashChainLedger | None = None,
         telemetry: Telemetry | None = None,
     ) -> None:
+        if gates is not None and len(gates) == 0:
+            raise ValueError(
+                "an empty gate list would release any text; pass at least one gate, or leave gates unset for the default stack"
+            )
         self._generator = generator
         self.config = config or HISTORICAL
         self.rules = rules or default_rules()
